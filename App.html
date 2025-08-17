@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>SGHSS - VidaPlus</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f4f6f9;
+    }
+    header {
+      background: #0077cc;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      background: #005fa3;
+      padding: 10px;
+    }
+    nav button {
+      background: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    nav button:hover {
+      background: #e0e0e0;
+    }
+    section {
+      display: none;
+      padding: 20px;
+    }
+    section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button.action {
+      background: #0077cc;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      margin-top: 8px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button.action:hover {
+      background: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p>Fernando Gonçalves Prudente RU:4300547</p>
+    <h1>SGHSS - VidaPlus</h1>
+    <p>Sistema de Gestão Hospitalar e de Serviços de Saúde</p>
+  </header>
+
+  <nav>
+    <button onclick="showSection('pacientes')">Pacientes</button>
+    <button onclick="showSection('profissionais')">Profissionais</button>
+    <button onclick="showSection('agenda')">Agenda</button>
+    <button onclick="showSection('telemedicina')">Telemedicina</button>
+    <button onclick="showSection('administracao')">Administração</button>
+    <button onclick="showSection('seguranca')">Segurança</button>
+  </nav>
+
+  <!-- Seções -->
+  <main>
+    <section id="pacientes" class="active">
+      <h2>Cadastro de Pacientes</h2>
+      <div class="card">
+        <input type="text" id="nomePaciente" placeholder="Nome do paciente">
+        <input type="text" id="cpfPaciente" placeholder="CPF">
+        <button class="action" onclick="cadastrarPaciente()">Cadastrar</button>
+      </div>
+      <h3>Lista de Pacientes</h3>
+      <div id="listaPacientes"></div>
+    </section>
+
+    <section id="profissionais">
+      <h2>Cadastro de Profissionais</h2>
+      <div class="card">
+        <input type="text" id="nomeProfissional" placeholder="Nome do profissional">
+        <select id="cargoProfissional">
+          <option value="Médico">Médico</option>
+          <option value="Enfermeiro">Enfermeiro</option>
+          <option value="Técnico">Técnico</option>
+        </select>
+        <button class="action" onclick="cadastrarProfissional()">Cadastrar</button>
+      </div>
+      <h3>Lista de Profissionais</h3>
+      <div id="listaProfissionais"></div>
+    </section>
+
+    <section id="agenda">
+      <h2>Agendamento</h2>
+      <div class="card">
+        <input type="text" id="pacienteAgenda" placeholder="Nome do paciente">
+        <input type="text" id="profAgenda" placeholder="Nome do profissional">
+        <input type="date" id="dataAgenda">
+        <button class="action" onclick="agendarConsulta()">Agendar Consulta</button>
+      </div>
+      <h3>Consultas Agendadas</h3>
+      <div id="listaAgenda"></div>
+    </section>
+
+    <section id="telemedicina">
+      <h2>Telemedicina</h2>
+      <div class="card">
+        <p><strong>Simulação de sala de teleconsulta segura 🔒</strong></p>
+        <button class="action" onclick="alert('Iniciando videochamada segura...')">Iniciar Teleconsulta</button>
+      </div>
+    </section>
+
+    <section id="administracao">
+      <h2>Administração</h2>
+      <div class="card">
+        <p>Controle de leitos, suprimentos e relatórios financeiros (simulação).</p>
+      </div>
+    </section>
+
+    <section id="seguranca">
+      <h2>Segurança e Compliance</h2>
+      <div class="card">
+        <p>Controle de acesso, LGPD e logs de auditoria.</p>
+        <button class="action" onclick="verLogs()">Ver Logs</button>
+        <div id="logs"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Função para alternar seções
+    function showSection(id) {
+      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    // Cadastro de pacientes
+    function cadastrarPaciente() {
+      let nome = document.getElementById("nomePaciente").value;
+      let cpf = document.getElementById("cpfPaciente").value;
+      if(nome && cpf) {
+        let pacientes = JSON.parse(localStorage.getItem("pacientes")) || [];
+        pacientes.push({nome, cpf});
+        localStorage.setItem("pacientes", JSON.stringify(pacientes));
+        document.getElementById("nomePaciente").value = "";
+        document.getElementById("cpfPaciente").value = "";
+        listarPacientes();
+        registrarLog("Cadastro de paciente: " + nome);
+      }
+    }
+
+    function listarPacientes() {
+      let pacientes = JSON.parse(localStorage.getItem("pacientes")) || [];
+      let html = pacientes.map(p => `<div class='card'>${p.nome} - ${p.cpf}</div>`).join("");
+      document.getElementById("listaPacientes").innerHTML = html;
+    }
+
+    // Cadastro de profissionais
+    function cadastrarProfissional() {
+      let nome = document.getElementById("nomeProfissional").value;
+      let cargo = document.getElementById("cargoProfissional").value;
+      if(nome) {
+        let profissionais = JSON.parse(localStorage.getItem("profissionais")) || [];
+        profissionais.push({nome, cargo});
+        localStorage.setItem("profissionais", JSON.stringify(profissionais));
+        document.getElementById("nomeProfissional").value = "";
+        listarProfissionais();
+        registrarLog("Cadastro de profissional: " + nome);
+      }
+    }
+
+    function listarProfissionais() {
+      let profissionais = JSON.parse(localStorage.getItem("profissionais")) || [];
+      let html = profissionais.map(p => `<div class='card'>${p.nome} - ${p.cargo}</div>`).join("");
+      document.getElementById("listaProfissionais").innerHTML = html;
+    }
+
+    // Agenda
+    function agendarConsulta() {
+      let paciente = document.getElementById("pacienteAgenda").value;
+      let profissional = document.getElementById("profAgenda").value;
+      let data = document.getElementById("dataAgenda").value;
+      if(paciente && profissional && data) {
+        let agenda = JSON.parse(localStorage.getItem("agenda")) || [];
+        agenda.push({paciente, profissional, data});
+        localStorage.setItem("agenda", JSON.stringify(agenda));
+        listarAgenda();
+        registrarLog("Agendamento: " + paciente + " com " + profissional);
+      }
+    }
+
+    function listarAgenda() {
+      let agenda = JSON.parse(localStorage.getItem("agenda")) || [];
+      let html = agenda.map(a => `<div class='card'>${a.paciente} com ${a.profissional} em ${a.data}</div>`).join("");
+      document.getElementById("listaAgenda").innerHTML = html;
+    }
+
+    // Logs
+    function registrarLog(msg) {
+      let logs = JSON.parse(localStorage.getItem("logs")) || [];
+      logs.push({msg, data: new Date().toLocaleString()});
+      localStorage.setItem("logs", JSON.stringify(logs));
+    }
+
+    function verLogs() {
+      let logs = JSON.parse(localStorage.getItem("logs")) || [];
+      let html = logs.map(l => `<div class='card'>${l.data} - ${l.msg}</div>`).join("");
+      document.getElementById("logs").innerHTML = html;
+    }
+
+    // Carregar listas ao iniciar
+    window.onload = () => {
+      listarPacientes();
+      listarProfissionais();
+      listarAgenda();
+    };
+  </script>
+</body>
+</html>
